@@ -2,6 +2,14 @@
   hosts: backend
   become: yes
   tasks:
+  - name: install python dependecy packages 
+    ansible.builtin.pip:
+      name: "{{ item }}"
+      executable: pip3.9
+    loop:
+    - PyMySQL
+    - cryptography
+    
   - name: disable nodejs package
     ansible.builtin.command: dnf module disable nodejs -y
   
@@ -10,8 +18,11 @@
 
   - name: install nodejs
     ansible.builtin.package:
-      name: nodejs
+      name: {{ item }}
       state: present
+      loop:
+      - nodejs
+      - mysql
 
   - name: add expense user
     ansible.builtin.user:
@@ -32,3 +43,24 @@
       src: /tmp/backend.zip
       dest: /app
       remote_src: yes
+
+  - name: install dependencies
+    community.general.npm:
+      path: /app  #Install packages based on package.json.
+
+  - name: copy the backend.service
+    ansible.builtin.copy:
+      src: /app
+      dest: /etc/systemd/system
+
+  - name: import backend.sql schema into db
+    community.mysql.mysql_db:
+      state: dump  #mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pExpenseApp@1 < /app/schema/backend.sql
+      name: backend.mysql
+      target: /app/schema
+
+    - name: daemon reload and restart service
+      ansible.builtin.systemd_service:
+        state: restarted
+        daemon_reload: true
+        name: backend
