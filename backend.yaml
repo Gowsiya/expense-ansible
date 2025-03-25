@@ -54,7 +54,7 @@
 
   - name: copy the backend.service
     ansible.builtin.copy:
-      src: /app
+      src: backend.service
       dest: /etc/systemd/system
 
   - name: import backend.sql schema into db
