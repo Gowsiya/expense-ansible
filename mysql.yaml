@@ -23,9 +23,9 @@
 
   - name: connect to mysql server
     vars_prompt:
-    - name: mysql_root_password
-      prompt: enter mysql root password
-      private: false # it will visible when you type password when you get the prompt
+     - name: mysql_root_password
+       prompt: enter mysql root password
+       private: false # it will visible when you type password when you get the prompt
     community.mysql.mysql_info: #mysql -h <host-address> -u root -p<password>
       login_user: root
       login_password: mysql_root_password
