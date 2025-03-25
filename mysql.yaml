@@ -1,7 +1,7 @@
 - name: configure mysql server
   hosts: mysql
   become: yes
-  vars_pompt:
+  vars_prompt:
     - name: mysql_root_password
       prompt: enter mysql root password
       private: false
