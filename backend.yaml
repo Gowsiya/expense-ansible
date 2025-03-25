@@ -66,9 +66,9 @@
       login_host: mysql.gsdevops.online
       target: /app/schema
 
-    - name: daemon reload and restart service
-      ansible.builtin.systemd_service:
-        state: restarted
-        daemon_reload: true
-        name: backend
-        enabled: true
+  - name: daemon reload and restart service
+    ansible.builtin.systemd_service:
+      state: restarted
+      daemon_reload: true
+      name: backend
+      enabled: true
