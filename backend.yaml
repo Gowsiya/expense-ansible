@@ -1,23 +1,11 @@
 - name: configure backend server
   hosts: backend
   become: yes
-  vars_prompt:
-    - name: mysql_root_password
-      prompt: enter the mysql root password
-      private: false
   tasks:
-  - name: install python dependecy packages 
-    ansible.builtin.pip:
-      name: "{{ item }}"
-      executable: pip3.9
-    loop:
-    - PyMySQL
-    - cryptography
-    
-  - name: disable nodejs package
+  - name: disable current nodejs
     ansible.builtin.command: dnf module disable nodejs -y
-  
-  - name: enable nodejs20
+
+  - name: enable nodejs 20
     ansible.builtin.command: dnf module enable nodejs:20 -y
 
   - name: install nodejs
@@ -25,50 +13,58 @@
       name: "{{ item }}"
       state: present
     loop:
-     - nodejs
-     - mysql
+    - nodejs
+    - mysql
 
-  - name: add expense user
+  - name: create expense user
     ansible.builtin.user:
       name: expense
-  
-  - name: create a /app directory if it does not exist
+
+  - name: create app directory
     ansible.builtin.file:
       path: /app
       state: directory
   
-  - name: Download the application code to created repository
+  - name: download backend code
     ansible.builtin.get_url:
       url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
       dest: /tmp/backend.zip
-  
-  - name: unarchive the file that is already in the remote mession
+
+  - name: unzip backend code
     ansible.builtin.unarchive:
       src: /tmp/backend.zip
       dest: /app
       remote_src: yes
-
-  - name: install dependencies
+  
+  - name: Install dependencies
     community.general.npm:
-      path: /app  #Install packages based on package.json.
+      path: /app
 
-  - name: copy the backend.service
+  - name: copy backend service
     ansible.builtin.copy:
       src: backend.service
-      dest: /etc/systemd/system
+      dest: /etc/systemd/system/backend.service
 
-  - name: import backend.sql schema into db
+  - name: install python libs
+    ansible.builtin.pip:
+      name: "{{ item }}"
+      executable: pip3.9
+    loop:
+    - cryptography
+    - PyMySQL
+
+  - name: import mysql data
     community.mysql.mysql_db:
-      state: import  #mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pExpenseApp@1 < /app/schema/backend.sql
+      state: import
       name: all
       login_user: root
-      login_password: mysql_root_password
-      login_host: mysql.gsdevops.online
+      login_password: ExpenseApp@1
+      login_host: mysql.daws82s.online
       target: /app/schema/backend.sql
 
   - name: daemon reload and restart service
     ansible.builtin.systemd_service:
+      enabled: true
       state: restarted
       daemon_reload: true
       name: backend
-      enabled: true
