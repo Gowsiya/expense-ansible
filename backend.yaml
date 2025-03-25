@@ -1,6 +1,10 @@
 - name: backend
   hosts: backend
   become: yes
+  vars_prompt:
+    - name: mysql_root_password
+      prompt: enter the mysql root password
+      private: false
   tasks:
   - name: install python dependecy packages 
     ansible.builtin.pip:
@@ -56,11 +60,14 @@
   - name: import backend.sql schema into db
     community.mysql.mysql_db:
       state: dump  #mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pExpenseApp@1 < /app/schema/backend.sql
-      name: backend.mysql
+      name: all
+      login_user: root
+      login_password: mysql_root_password
+      login_host: mysql.gsdevops.online
       target: /app/schema
 
-    - name: daemon reload and restart service
-      ansible.builtin.systemd_service:
-        state: restarted
-        daemon_reload: true
-        name: backend
+    # - name: daemon reload and restart service
+    #   ansible.builtin.systemd_service:
+    #     state: restarted
+    #     daemon_reload: true
+    #     name: backend
