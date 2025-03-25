@@ -8,12 +8,12 @@
   tasks:
   - name: install python dependecy packages 
     ansible.builtin.pip:
-      name: {{ item }}
-      executables: pip3.9
+      name: "{{ item }}""
+      executable: pip3.9
     loop:
     - PyMySQL
     - cryptography
-    
+
   - name: install Mysql server
     ansible.builtin.package:
       name: nginx
