@@ -4,7 +4,7 @@
   vars_prompt:
     - name: mysql_root_password
       prompt: enter mysql root password
-      private: false
+      private: false # it will visible when you type password when you get the prompt
   tasks:
   - name: install python dependecy packages 
     ansible.builtin.pip:
